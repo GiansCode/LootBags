@@ -1,0 +1,8 @@
+name: LootBags
+version: 1.0
+main: tech.shadowsystems.lootbags.LootBagsPlugin
+authors: [Shadow Technical Systems LLC]
+website: www.shadowsystems.tech
+commands:
+  lootbags:
+    description: The command for Loot Bags.
