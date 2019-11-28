@@ -1,4 +1,4 @@
-package tech.shadowsystems.lootbags.inventory;
+package io.alerium.lootbags.inventory;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -8,9 +8,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import tech.shadowsystems.lootbags.ChatUtil;
-import tech.shadowsystems.lootbags.LootBagsManager;
-import tech.shadowsystems.lootbags.LootBagsPlugin;
+
+import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.LootBagsManager;
+import io.alerium.lootbags.LootBagsPlugin;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.

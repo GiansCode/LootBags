@@ -1,18 +1,19 @@
-package tech.shadowsystems.lootbags.commands;
+package io.alerium.lootbags.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tech.shadowsystems.lootbags.ChatUtil;
-import tech.shadowsystems.lootbags.LootBagsManager;
-import tech.shadowsystems.lootbags.LootBagsPlugin;
+
+import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.LootBagsManager;
+import io.alerium.lootbags.LootBagsPlugin;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.
  */
-public class MainCommand implements CommandExecutor {
+public class LootbagsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

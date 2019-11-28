@@ -1,4 +1,4 @@
-package tech.shadowsystems.lootbags;
+package io.alerium.lootbags;
 
 import org.bukkit.ChatColor;
 

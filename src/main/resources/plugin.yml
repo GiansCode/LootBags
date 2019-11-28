@@ -1,6 +1,6 @@
 name: LootBags
 version: 1.0
-main: tech.shadowsystems.lootbags.LootBagsPlugin
+main: io.alerium.lootbags.LootBagsPlugin
 authors: [Shadow Technical Systems LLC]
 website: www.shadowsystems.tech
 commands:
