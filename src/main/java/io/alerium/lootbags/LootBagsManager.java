@@ -2,6 +2,7 @@ package io.alerium.lootbags;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -17,29 +18,49 @@ import java.util.*;
 public class LootBagsManager {
 
     private static LootBagsManager ourInstance = new LootBagsManager();
+    private final boolean isLegacy;
     public static LootBagsManager getInstance() {
         return ourInstance;
     }
+
     private LootBagsManager() {
+        boolean isLegacy1;
+        try {
+            Class.forName("org.bukkit.NamespacedKey");
+            isLegacy1 = false;
+        } catch (ClassNotFoundException e) {
+            isLegacy1 = true;
+        }
+        isLegacy = isLegacy1;
     }
 
-    private List<LootBag> bags = new ArrayList<>();
+    private Map<String, LootBag> bags = new HashMap<>();
 
     public void boot(FileConfiguration fileConfiguration) {
         for (String bag : fileConfiguration.getConfigurationSection("bags").getKeys(false)) {
             LootBag lootBag = new LootBag(fileConfiguration.getString("bags." + bag + ".settings.name"), parseItem("bags." + bag + ".item", fileConfiguration), fileConfiguration.getBoolean("bags." + bag + ".settings.usePermission"), fileConfiguration.getStringList("bags." + bag + ".drops"), fileConfiguration.getStringList("bags." + bag + ".loot"));
-            bags.add(lootBag);
+            bags.put(lootBag.name, lootBag);
         }
 
-        for (LootBag bag : getBags()) {
-            try {
-                ShapelessRecipe recipe = new ShapelessRecipe(getBags().get(getBags().indexOf(bag) + 1).getItem());
+        // using an array deque, we'll peek into the next slot instead of relying upon an exception
+        // to populate recipes
+        final ArrayDeque<LootBag> processingBags = new ArrayDeque<>(getBags());
+        while (!processingBags.isEmpty()) {
+            final LootBag currentBag = processingBags.pop();
+            // Declare var, mainly for making the IDE quiet
+            final LootBag nextBag = processingBags.peek();
+            if (nextBag != null) {
+                ShapelessRecipe recipe;
 
-                recipe.addIngredient(4, bag.getItem().getData());
-                bag.setRecipe(recipe);
+                if (isLegacy) {
+                    recipe = new ShapelessRecipe(processingBags.peek().getItem());
+                } else {
+                    recipe = new ShapelessRecipe(new NamespacedKey(LootBagsPlugin.getInstance(), currentBag.getName()),nextBag.getItem());
+                }
+
+                recipe.addIngredient(4, Objects.requireNonNull(currentBag.getItem().getData()));
+                currentBag.setRecipe(recipe);
                 LootBagsPlugin.getInstance().getServer().addRecipe(recipe);
-            } catch (IndexOutOfBoundsException ex) {
-                // nothing
             }
         }
 
@@ -66,10 +87,10 @@ public class LootBagsManager {
     }
 
     public List<LootBag> getBags() {
-        return bags;
+        return new ArrayList<>(bags.values());
     }
 
-    public class LootBag {
+    public static class LootBag {
 
         private String name;
         private ItemStack item;

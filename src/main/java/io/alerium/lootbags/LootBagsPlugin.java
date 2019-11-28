@@ -2,7 +2,7 @@ package io.alerium.lootbags;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import io.alerium.lootbags.commands.LootbagCommand;
+import io.alerium.lootbags.commands.LootbagsCommand;
 import io.alerium.lootbags.inventory.CraftListener;
 import io.alerium.lootbags.inventory.EntityDeathListener;
 import io.alerium.lootbags.inventory.InteractListener;
@@ -24,7 +24,7 @@ public final class LootBagsPlugin extends JavaPlugin implements Listener {
         this.getServer().getPluginManager().registerEvents(new InteractListener(), this);
         this.getServer().getPluginManager().registerEvents(new CraftListener(), this);
 
-        getCommand("lootbags").setExecutor(new LootbagCommand());
+        getCommand("lootbags").setExecutor(new LootbagsCommand());
 
         LootBagsManager.getInstance().boot(getConfig());
     }
