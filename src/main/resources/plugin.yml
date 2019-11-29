@@ -3,7 +3,7 @@ version: 1.0
 main: io.alerium.lootbags.LootBagsPlugin
 authors: [Shadow Technical Systems LLC]
 website: www.shadowsystems.tech
-api-version: "1.13" # API version to keep bukkit happy, this has no implications on this plugin
+#api-version: "1.13" # API version to keep bukkit happy, this has no implications on this plugin
 commands:
   lootbags:
     description: The command for Loot Bags.
