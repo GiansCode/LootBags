@@ -3,7 +3,9 @@ package io.alerium.lootbags;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -11,6 +13,8 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
+
+import pw.valaria.requirementsprocessor.RequirementsUtil;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.
@@ -32,13 +36,15 @@ public class LootBagsManager {
             isLegacy1 = true;
         }
         isLegacy = isLegacy1;
+
+        RequirementsUtil.isDebug();
     }
 
     private Map<String, LootBag> bags = new HashMap<>();
 
     public void boot(FileConfiguration fileConfiguration) {
         for (String bag : fileConfiguration.getConfigurationSection("bags").getKeys(false)) {
-            LootBag lootBag = new LootBag(fileConfiguration.getString("bags." + bag + ".settings.name"), parseItem("bags." + bag + ".item", fileConfiguration), fileConfiguration.getBoolean("bags." + bag + ".settings.usePermission"), fileConfiguration.getStringList("bags." + bag + ".drops"), fileConfiguration.getStringList("bags." + bag + ".loot"));
+            LootBag lootBag = new LootBag(fileConfiguration.getString("bags." + bag + ".settings.name"), parseItem("bags." + bag + ".item", fileConfiguration), fileConfiguration.getConfigurationSection("bags." + bag + ".requirements"), fileConfiguration.getStringList("bags." + bag + ".drops"), fileConfiguration.getStringList("bags." + bag + ".loot"));
             bags.put(lootBag.name, lootBag);
         }
 
@@ -94,16 +100,23 @@ public class LootBagsManager {
 
         private String name;
         private ItemStack item;
-        private boolean usePermission;
         private List<String> dropsString;
         private List<String> lootString;
         private Recipe recipe;
+        private ConfigurationSection requirements;
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
-        public LootBag(String name, ItemStack item, boolean usePermission, List<String> dropsString, List<String> lootString) {
+        public LootBag(String name, ItemStack item, ConfigurationSection requirements, List<String> dropsString, List<String> lootString) {
             this.name = name;
             this.item = item;
-            this.usePermission = usePermission;
+            // The design choice of the requirements util requires that the requirements are extracted from the item,
+            // Our solution for this to ensure sane API support by re-embedding the passed requirements into a requirements section if needed
+            if (requirements.get("requirements") == null) {
+                this.requirements = new YamlConfiguration();
+                this.requirements.set("requirements", requirements);
+            } else {
+                this.requirements = requirements;
+            }
             this.dropsString = dropsString;
             this.lootString = lootString;
         }
@@ -124,8 +137,8 @@ public class LootBagsManager {
         }
 
         public void process(Player player) {
-            if (usePermission) {
-                if (!player.hasPermission("lootbags." + name)) {
+            if (requirements != null) {
+                if (!RequirementsUtil.handle(player, requirements)) {
                     player.sendMessage(ChatUtil.format("&cYou don't have permission to open this loot bag."));
                     return;
                 }
