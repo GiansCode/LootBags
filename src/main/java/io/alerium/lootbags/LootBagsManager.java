@@ -111,7 +111,7 @@ public class LootBagsManager {
             this.item = item;
             // The design choice of the requirements util requires that the requirements are extracted from the item,
             // Our solution for this to ensure sane API support by re-embedding the passed requirements into a requirements section if needed
-            if (requirements.get("requirements") == null) {
+            if (requirements != null && requirements.get("requirements") == null) {
                 this.requirements = new YamlConfiguration();
                 this.requirements.set("requirements", requirements);
             } else {
