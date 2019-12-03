@@ -13,6 +13,10 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import pw.valaria.requirementsprocessor.RequirementsUtil;
 
@@ -80,24 +84,15 @@ public class LootBagsManager {
 
             ConfigurationSection bagSection = fileConfiguration.getConfigurationSection("bags." + bagName);
 
-            InventoryType inventoryType = defaultInventoryType;
-
-            try {
-                String inventoryTypeString = bagSection.getString("settings.inventory-type");
-                if (inventoryTypeString != null) {
-                    inventoryType = InventoryType.valueOf(inventoryTypeString);
-                }
-            } catch (IllegalArgumentException ex) {
-                LootBagsPlugin.getInstance().getLogger().warning("Unknown inventory type, defaulting to hopper!");
-            }
-
             LootBag lootBag = new LootBag(
                     bagSection.getString("settings.name"),
                     parseItem(bagSection.getConfigurationSection("item")),
                     bagSection.getConfigurationSection("requirements"),
                     bagSection.getStringList("drops"),
                     bagSection.getStringList("loot"),
-                    inventoryType);
+                    (lootBag1) -> {
+                        return Utils.createInventory(lootBag1.getName() + " Loot Bag", bagSection.getString("settings.inventory-type-or-size"), defaultInventoryType);
+                    });
             bags.put(lootBag.name, lootBag);
         }
 
@@ -161,17 +156,17 @@ public class LootBagsManager {
 
         private String name;
         private ItemStack item;
-        private InventoryType inventoryType;
+        private Function<LootBag, Inventory> inventoryCreator;
         private List<String> dropsString;
         private List<String> lootString;
         private Recipe recipe;
         private ConfigurationSection requirements;
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
-        public LootBag(String name, ItemStack item, ConfigurationSection requirements, List<String> dropsString, List<String> lootString, InventoryType inventoryType) {
+        public LootBag(String name, ItemStack item, ConfigurationSection requirements, List<String> dropsString, List<String> lootString, Function<LootBag, Inventory> inventoryCreator) {
             this.name = name;
             this.item = item;
-            this.inventoryType = inventoryType;
+            this.inventoryCreator = inventoryCreator;
             // The design choice of the requirements util requires that the requirements are extracted from the item,
             // Our solution for this to ensure sane API support by re-embedding the passed requirements into a requirements section if needed
             if (requirements != null && requirements.get("requirements") == null) {
@@ -208,7 +203,7 @@ public class LootBagsManager {
             }
 
 //            if (inventoryMap.get(player) == null) {
-                Inventory inventory = Bukkit.createInventory(null, inventoryType, name + " Loot Bag");
+            Inventory inventory = inventoryCreator.apply(this);
 
                 Random random = new Random();
                 String randomLoot = lootString.get(random.nextInt(lootString.size()));
@@ -276,10 +271,6 @@ public class LootBagsManager {
 
         public String getName() {
             return name;
-        }
-
-        public InventoryType getInventoryType() {
-            return inventoryType;
         }
 
 //        public Inventory getInventory(Player player) {
