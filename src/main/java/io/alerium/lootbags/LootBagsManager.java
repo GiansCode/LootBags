@@ -23,6 +23,7 @@ public class LootBagsManager {
 
     private static LootBagsManager ourInstance = new LootBagsManager();
     private final boolean isLegacy;
+    private boolean configWasMutated = false;
     public static LootBagsManager getInstance() {
         return ourInstance;
     }
@@ -43,6 +44,29 @@ public class LootBagsManager {
     private Map<String, LootBag> bags = new HashMap<>();
 
     public void boot(FileConfiguration fileConfiguration) {
+
+        // Migrations
+        ConfigurationSection bagSections = fileConfiguration.getConfigurationSection("bags");
+        if (bagSections == null) {
+            LootBagsPlugin.getInstance().getLogger().warning("Configuration does not have any bags defined!");
+            return;
+        }
+
+        for (String bagName : bagSections.getKeys(false)) {
+            ConfigurationSection bag = bagSections.getConfigurationSection(bagName);
+            if (bag.isSet("settings.usePermission")) {
+                if (bag.getBoolean("settings.usePermission")) {
+                    final ConfigurationSection bagPermRequirement = bag.createSection("requirements")
+                                                                        .createSection("permission");
+
+                    bagPermRequirement.set("requirement-type", "HAS_PERMISSION");
+                    bagPermRequirement.set("input", "lootbags." + bagName);
+                }
+                bag.set("settings.usePermission", null);
+                configWasMutated = true;
+            }
+        }
+
         for (String bag : fileConfiguration.getConfigurationSection("bags").getKeys(false)) {
             LootBag lootBag = new LootBag(fileConfiguration.getString("bags." + bag + ".settings.name"), parseItem("bags." + bag + ".item", fileConfiguration), fileConfiguration.getConfigurationSection("bags." + bag + ".requirements"), fileConfiguration.getStringList("bags." + bag + ".drops"), fileConfiguration.getStringList("bags." + bag + ".loot"));
             bags.put(lootBag.name, lootBag);
@@ -94,6 +118,10 @@ public class LootBagsManager {
 
     public List<LootBag> getBags() {
         return new ArrayList<>(bags.values());
+    }
+
+    public boolean configWasMutated() {
+        return configWasMutated;
     }
 
     public static class LootBag {

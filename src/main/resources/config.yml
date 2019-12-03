@@ -1,47 +1,56 @@
 bags:
-    'Common':
-        item:
-          type: "IRON_ORE"
-          data: 0
-          name: "&5Common Loot Bag"
-          lore:
-            - "&fClick for Common Loot"
-        settings:
-            usePermission: true
-            name: "Common"
-        drops:
-        - "CREEPER;20"
-        loot:
-        - "PAPER;0;1;50"
-    'Rare':
-        item:
-          type: "DIAMOND_ORE"
-          data: 0
-          name: "&aRare Loot Bag"
-          lore:
-             - "&fClick for Rare Loot"
-        settings:
-          usePermission: true
-          name: "Rare"
-        drops:
-        - "ZOMBIE;20"
-        loot:
-        - "DIAMOND;0;1;50"
-    'Ultra':
-        item:
-          type: "REDSTONE_ORE"
-          data: 0
-          name: "&aUltra Loot Bag"
-          lore:
-             - "&fClick for Ultra Loot"
-        settings:
-          usePermission: true
-          name: "Ultra"
-        drops:
-        - "SKELETON;20"
-        loot:
-        - "DIAMOND;0;32;50"
-        - "EMERALD;0;64;50"
+  Common:
+    item:
+      type: IRON_ORE
+      data: 0
+      name: '&5Common Loot Bag'
+      lore:
+        - '&fClick for Common Loot'
+    settings:
+      name: Common
+    drops:
+      - CREEPER;20
+    loot:
+      - PAPER;0;1;50
+    requirements:
+      permission:
+        requirement-type: HAS_PERMISSION
+        input: lootbags.Common
+  Rare:
+    item:
+      type: DIAMOND_ORE
+      data: 0
+      name: '&aRare Loot Bag'
+      lore:
+        - '&fClick for Rare Loot'
+    settings:
+      name: Rare
+    drops:
+      - ZOMBIE;20
+    loot:
+      - DIAMOND;0;1;50
+    requirements:
+      permission:
+        requirement-type: HAS_PERMISSION
+        input: lootbags.Rare
+  Ultra:
+    item:
+      type: REDSTONE_ORE
+      data: 0
+      name: '&aUltra Loot Bag'
+      lore:
+        - '&fClick for Ultra Loot'
+    settings:
+      name: Ultra
+    drops:
+      - SKELETON;20
+    loot:
+      - DIAMOND;0;32;50
+      - EMERALD;0;64;50
+    requirements:
+      permission:
+        requirement-type: HAS_PERMISSION
+        input: lootbags.Ultra
 messages:
   bagNotExist: "&cThat bag doesn't exist."
   giveAll: "&b%sender% gave everyone %amount% %type% loot bags!"

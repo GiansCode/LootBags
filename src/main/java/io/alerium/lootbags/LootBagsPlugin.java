@@ -2,6 +2,9 @@ package io.alerium.lootbags;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+
 import io.alerium.lootbags.commands.LootbagsCommand;
 import io.alerium.lootbags.inventory.CraftListener;
 import io.alerium.lootbags.inventory.EntityDeathListener;
@@ -31,7 +34,9 @@ public final class LootBagsPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        if (LootBagsManager.getInstance().configWasMutated()) {
+            saveConfig();
+        }
     }
 
     public static LootBagsPlugin getInstance() {
