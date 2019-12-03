@@ -59,3 +59,5 @@ messages:
   playerOffline: "&cThat player is offline."
   useBag: "&aYou opened your %type% loot bag!"
   noShift: "&cYou cannot use shift click."
+settings:
+  default-inventory-type: HOPPER

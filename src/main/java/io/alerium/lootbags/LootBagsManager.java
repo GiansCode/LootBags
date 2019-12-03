@@ -51,7 +51,7 @@ public class LootBagsManager {
     public void boot(FileConfiguration fileConfiguration) {
 
         try {
-            String inventoryType = fileConfiguration.getString("default-inventory-type", "HOPPER");
+            String inventoryType = fileConfiguration.getString("settings.default-inventory-type", "HOPPER");
             defaultInventoryType = InventoryType.valueOf(inventoryType);
         } catch (IllegalArgumentException ex) {
             LootBagsPlugin.getInstance().getLogger().warning("Unknown inventory type, defaulting to hopper!");
