@@ -197,7 +197,7 @@ public class LootBagsManager {
                     }
                 }
 
-                player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replaceAll("%type%", getName())));
+                player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", getName())));
 
                 player.openInventory(inventory);
                 if (player.getItemInHand().getAmount() <= 1) {

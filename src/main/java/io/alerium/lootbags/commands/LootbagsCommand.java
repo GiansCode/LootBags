@@ -63,9 +63,9 @@ public class LootbagsCommand implements CommandExecutor {
 
                         player.sendMessage(
                                 ChatUtil.format(LootBagsPlugin.getInstance().getMessage("give")
-                                        .replaceAll("%sender%", sender.getName())
-                                        .replaceAll("%type%", name)
-                                        .replaceAll("%amount%", amount + "")));
+                                        .replace("%sender%", sender.getName())
+                                        .replace("%type%", name)
+                                        .replace("%amount%", amount + "")));
                         for (int x = 0; x < amount; x++) {
                             player.getInventory().addItem(bag.getItem());
                         }
@@ -100,9 +100,9 @@ public class LootbagsCommand implements CommandExecutor {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         player.sendMessage(
                                 ChatUtil.format(LootBagsPlugin.getInstance().getMessage("giveAll")
-                                        .replaceAll("%sender%", sender.getName())
-                                        .replaceAll("%type%", name)
-                                        .replaceAll("%amount%", amount + "")));
+                                        .replace("%sender%", sender.getName())
+                                        .replace("%type%", name)
+                                        .replace("%amount%", amount + "")));
                         for (int x = 0; x < amount; x++) {
                             player.getInventory().addItem(bag.getItem());
                         }

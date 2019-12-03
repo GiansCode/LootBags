@@ -37,7 +37,7 @@ public class InventoryListener implements Listener {
                             return;
                         }
 
-//                        player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replaceAll("%type%", bag.getName()).replaceAll("%item%", capitalizeString(itemStack.getType().name().replaceAll("_", " ")))));
+//                        player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", bag.getName()).replace("%item%", capitalizeString(itemStack.getType().name().replace("_", " ")))));
 
 //                        if (bag.getInventory(player) != null) {
 //                            bag.remove(player);
