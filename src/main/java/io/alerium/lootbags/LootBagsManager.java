@@ -24,6 +24,7 @@ public class LootBagsManager {
     private static LootBagsManager ourInstance = new LootBagsManager();
     private final boolean isLegacy;
     private boolean configWasMutated = false;
+    private InventoryType defaultInventoryType;
     public static LootBagsManager getInstance() {
         return ourInstance;
     }
@@ -44,6 +45,14 @@ public class LootBagsManager {
     private Map<String, LootBag> bags = new HashMap<>();
 
     public void boot(FileConfiguration fileConfiguration) {
+
+        String inventoryType = fileConfiguration.getString("default-inventory-type", "HOPPER");
+        try {
+            defaultInventoryType = InventoryType.valueOf(inventoryType);
+        } catch (IllegalArgumentException ex) {
+            LootBagsPlugin.getInstance().getLogger().warning("Unknown inventory type, defaulting to hopper!");
+            defaultInventoryType = InventoryType.HOPPER;
+        }
 
         // Migrations
         ConfigurationSection bagSections = fileConfiguration.getConfigurationSection("bags");
@@ -67,8 +76,15 @@ public class LootBagsManager {
             }
         }
 
-        for (String bag : fileConfiguration.getConfigurationSection("bags").getKeys(false)) {
-            LootBag lootBag = new LootBag(fileConfiguration.getString("bags." + bag + ".settings.name"), parseItem("bags." + bag + ".item", fileConfiguration), fileConfiguration.getConfigurationSection("bags." + bag + ".requirements"), fileConfiguration.getStringList("bags." + bag + ".drops"), fileConfiguration.getStringList("bags." + bag + ".loot"));
+        for (String bagName : fileConfiguration.getConfigurationSection("bags").getKeys(false)) {
+
+            ConfigurationSection bagSection = fileConfiguration.getConfigurationSection("bags." + bagName);
+            LootBag lootBag = new LootBag(
+                    bagSection.getString("settings.name"),
+                    parseItem(bagSection.getConfigurationSection("item")),
+                    bagSection.getConfigurationSection("requirements"),
+                    bagSection.getStringList("drops"),
+                    bagSection.getStringList("loot"));
             bags.put(lootBag.name, lootBag);
         }
 
@@ -96,16 +112,20 @@ public class LootBagsManager {
 
     }
 
-    public ItemStack parseItem(String configPath, FileConfiguration fileConfiguration) {
-        Material material = Material.valueOf(fileConfiguration.getString(configPath + ".type").toUpperCase());
-        int data = fileConfiguration.getInt(configPath + ".data");
-        ItemStack itemStack = new ItemStack(material, 1, (short) data);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(ChatUtil.format(fileConfiguration.getString(configPath + ".name")));
-        itemMeta.setLore(color(fileConfiguration.getStringList(configPath + ".lore")));
-        itemStack.setItemMeta(itemMeta);
+    public ItemStack parseItem(ConfigurationSection itemSection) {
+        Material material = Material.valueOf(itemSection.getString("type").toUpperCase());
+        int data = itemSection.getInt("data");
 
+        ItemStack itemStack = new ItemStack(material, 1, (short) data);
+        ItemMeta meta = itemStack.getItemMeta();
+
+        assert meta != null; // All non-air itemstacks have meta!
+
+        meta.setDisplayName(ChatUtil.format(itemSection.getString("name")));
+        meta.setLore(color(itemSection.getStringList("lore")));
+        itemStack.setItemMeta(meta);
         return itemStack;
+
     }
 
     public List<String> color(List<String> list) {
