@@ -11,7 +11,10 @@ bags:
     drops:
       - CREEPER;20
     loot:
-      - PAPER;0;1;50
+      - type: PAPER
+        data: 0
+        amount: 1
+        percentage: 50
     requirements:
       permission:
         requirement-type: HAS_PERMISSION
@@ -28,7 +31,10 @@ bags:
     drops:
       - ZOMBIE;20
     loot:
-      - DIAMOND;0;1;50
+      - type: DIAMOND
+        data: 0
+        amount: 1
+        percentage: 50
     requirements:
       permission:
         requirement-type: HAS_PERMISSION
@@ -45,8 +51,14 @@ bags:
     drops:
       - SKELETON;20
     loot:
-      - DIAMOND;0;32;50
-      - EMERALD;0;64;50
+      - type: DIAMOND
+        data: 0
+        amount: 32
+        percentage: 50
+      - type: EMERALD
+        data: 0
+        amount: 64
+        percentage: 50
     requirements:
       permission:
         requirement-type: HAS_PERMISSION

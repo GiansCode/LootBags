@@ -11,6 +11,7 @@ import org.bukkit.inventory.Recipe;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 import io.alerium.lootbags.ChatUtil;
@@ -25,19 +26,17 @@ public class LootBag {
     private RequirementsPredicate requirements;
     private Function<LootBag, Inventory> inventoryCreator;
     private List<String> dropsString;
-    private List<String> lootString;
+    private List<Loot> loots;
     private Recipe recipe;
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
-    public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<String> dropsString, List<String> lootString, Function<LootBag, Inventory> inventoryCreator) {
+    public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<String> dropsString, List<Loot> loots, Function<LootBag, Inventory> inventoryCreator) {
         this.name = name;
         this.item = item;
         this.requirements = requirements;
+        this.loots = loots;
         this.inventoryCreator = inventoryCreator;
-        // The design choice of the requirements util requires that the requirements are extracted from the item,
-        // Our solution for this to ensure sane API support by re-embedding the passed requirements into a requirements section if needed
         this.dropsString = dropsString;
-        this.lootString = lootString;
     }
 
     public void processKill(Entity entity, Player player) {
@@ -46,7 +45,7 @@ public class LootBag {
                 continue;
             }
             int percentage = Integer.parseInt(drops.split(";")[1]);
-            int selected = randInt(0, 100, new Random());
+            int selected = randInt(0, 100);
 
             if (selected <= percentage) {
                 entity.getLocation().getWorld().dropItem(entity.getLocation(), item);
@@ -66,25 +65,15 @@ public class LootBag {
 //            if (inventoryMap.get(player) == null) {
         Inventory inventory = inventoryCreator.apply(this);
 
-        Random random = new Random();
-        String randomLoot = lootString.get(random.nextInt(lootString.size()));
+        Loot randomLoot = loots.get(ThreadLocalRandom.current().nextInt(loots.size()));
+        inventory.addItem(randomLoot.getItemStack());
 
-        {
-            int amount = Integer.parseInt(randomLoot.split(";")[2]);
-            short data = (short) Integer.parseInt(randomLoot.split(";")[1]);
-            String type = randomLoot.split(";")[0].toUpperCase();
-            inventory.addItem(new ItemStack(Material.valueOf(type), amount, data));
-        }
-
-        for (String loot : lootString) {
-            int percentage = Integer.parseInt(loot.split(";")[3]);
-            int selected = randInt(0, 100, new Random());
-
-            if (selected <= percentage) {
-                int amount = Integer.parseInt(loot.split(";")[2]);
-                short data = (short) Integer.parseInt(loot.split(";")[1]);
-                String type = loot.split(";")[0].toUpperCase();
-                inventory.addItem(new ItemStack(Material.valueOf(type), amount, data));
+        for (Loot loot : loots) {
+            int selected = randInt(0, 100);
+            if (selected <=loot.getPercentage()) {
+                ItemStack lootItem = loot.getItemStack().clone();
+                lootItem.setAmount(loot.getAmount());
+                inventory.addItem(lootItem);
             }
         }
 
@@ -114,8 +103,8 @@ public class LootBag {
         return inventory.getName().equalsIgnoreCase(name + " loot bag");
     }
 
-    private int randInt(int min, int max, Random random) {
-        return random.nextInt((max - min) + 1) + min;
+    private int randInt(int min, int max) {
+        return ThreadLocalRandom.current().nextInt((max - min) + 1) + min;
     }
 
     public ItemStack getItem() {
