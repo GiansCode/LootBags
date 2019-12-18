@@ -1,23 +1,22 @@
 package io.alerium.lootbags.data;
 
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
 import io.alerium.lootbags.RequirementsPredicate;
-import pw.valaria.requirementsprocessor.RequirementsUtil;
+import io.samdev.actionutil.ActionUtil;
 
 public class LootBag {
 
@@ -25,29 +24,30 @@ public class LootBag {
     private ItemStack item;
     private RequirementsPredicate requirements;
     private Function<LootBag, Inventory> inventoryCreator;
-    private List<String> dropsString;
     private List<Loot> loots;
+    private List<Reward> rewards;
     private Recipe recipe;
+
+    private EnumMap<EntityType, Drop> dropsEnumMap = new EnumMap<>(EntityType.class);
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
-    public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<String> dropsString, List<Loot> loots, Function<LootBag, Inventory> inventoryCreator) {
+    public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<Drop> drops, List<Loot> loots, List<Reward> rewards, Function<LootBag, Inventory> inventoryCreator) {
         this.name = name;
         this.item = item;
         this.requirements = requirements;
         this.loots = loots;
+        this.rewards = rewards;
         this.inventoryCreator = inventoryCreator;
-        this.dropsString = dropsString;
+
+        drops.forEach(drop -> dropsEnumMap.put(drop.getEntityType(), drop));
     }
 
     public void processKill(Entity entity, Player player) {
-        for (String drops : dropsString) {
-            if (!entity.getType().name().equalsIgnoreCase(drops.split(";")[0])) {
-                continue;
-            }
-            int percentage = Integer.parseInt(drops.split(";")[1]);
+        Drop drop = dropsEnumMap.get(entity.getType());
+        if (drop != null) {
             int selected = randInt(0, 100);
 
-            if (selected <= percentage) {
+            if (selected <= drop.getChance()) {
                 entity.getLocation().getWorld().dropItem(entity.getLocation(), item);
                 player.sendMessage(ChatUtil.format("&aYou got a " + name + " loot bag!"));
             }
@@ -78,6 +78,17 @@ public class LootBag {
         }
 
         player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", getName())));
+
+        if (LootBagsManager.getInstance().hasActionUtil()) {
+
+
+            for (Reward reward : rewards) {
+                int selected = randInt(0, 100);
+                if (selected <= reward.getChance()) {
+                    ActionUtil.executeActions(player, LootBagsManager.getInstance().getReward(reward.getReward()));
+                }
+            }
+        }
 
         player.openInventory(inventory);
         if (player.getItemInHand().getAmount() <= 1) {

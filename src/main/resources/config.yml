@@ -9,12 +9,16 @@ bags:
     settings:
       name: Common
     drops:
-      - CREEPER;20
+      - entity-type: CREEPER
+        percentage: 20
     loot:
       - type: PAPER
         data: 0
         amount: 1
         percentage: 50
+    rewards:
+      - reward: example
+        percentage: 20
     requirements:
       permission:
         requirement-type: HAS_PERMISSION
@@ -29,7 +33,8 @@ bags:
     settings:
       name: Rare
     drops:
-      - ZOMBIE;20
+      - entity-type: ZOMBIE
+        percentage: 20
     loot:
       - type: DIAMOND
         data: 0
@@ -49,7 +54,8 @@ bags:
     settings:
       name: Ultra
     drops:
-      - SKELETON;20
+      - entity-type: SKELETON
+        percentage: 20
     loot:
       - type: DIAMOND
         data: 0

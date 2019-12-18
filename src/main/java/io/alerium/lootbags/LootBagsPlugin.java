@@ -29,7 +29,7 @@ public final class LootBagsPlugin extends JavaPlugin implements Listener {
 
         getCommand("lootbags").setExecutor(new LootbagsCommand());
 
-        LootBagsManager.getInstance().boot(getConfig());
+        LootBagsManager.getInstance().boot(this);
     }
 
     @Override
