@@ -12,6 +12,7 @@ import org.bukkit.inventory.PlayerInventory;
 import io.alerium.lootbags.ChatUtil;
 import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
+import io.alerium.lootbags.data.LootBag;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.
@@ -22,7 +23,7 @@ public class InventoryListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
             Player player = (Player) event.getWhoClicked();
-            for (LootBagsManager.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.doesInventoryBelongToBag(event.getInventory())) {
                     ItemStack itemStack = event.getCurrentItem();
                     if (itemStack != null && itemStack.getType() != Material.AIR) {

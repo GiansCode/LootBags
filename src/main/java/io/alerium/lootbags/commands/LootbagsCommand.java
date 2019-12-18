@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import io.alerium.lootbags.ChatUtil;
 import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
+import io.alerium.lootbags.data.LootBag;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.
@@ -25,7 +26,7 @@ public class LootbagsCommand implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("list")) {
             sender.sendMessage(ChatUtil.format("&aThese are the current loot bags:"));
-            for (LootBagsManager.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
                 sender.sendMessage(ChatUtil.format("&a- " + bag.getName()));
             }
         } else if (args[0].equalsIgnoreCase("give")) {
@@ -58,7 +59,7 @@ public class LootbagsCommand implements CommandExecutor {
                 // ignore
             }
 
-            for (LootBagsManager.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.getName().equalsIgnoreCase(name)) {
 
                         player.sendMessage(
@@ -95,7 +96,7 @@ public class LootbagsCommand implements CommandExecutor {
                 // ignore
             }
 
-            for (LootBagsManager.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.getName().equalsIgnoreCase(name)) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         player.sendMessage(

@@ -7,6 +7,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import io.alerium.lootbags.LootBagsManager;
+import io.alerium.lootbags.data.LootBag;
 
 /**
  * Copyright © 2016 Jordan Osterberg and Shadow Technical Systems LLC. All rights reserved. Please email jordan.osterberg@shadowsystems.tech for usage rights and other information.
@@ -17,7 +18,7 @@ public class InteractListener implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            for (LootBagsManager.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.getItem().isSimilar(event.getItem())) {
                     event.setCancelled(true);
                     bag.process(player);
