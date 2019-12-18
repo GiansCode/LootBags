@@ -39,9 +39,9 @@ public class LootBagsManager {
         RequirementsUtil.isDebug();
     }
 
-    private Map<String, LootBag.LootBag> bags = new HashMap<>();
+    private Map<String, LootBag> bags = new HashMap<>();
 
-    public void boot(FileConfiguration fileConfiguration) {
+    void boot(FileConfiguration fileConfiguration) {
 
         try {
             String inventoryType = fileConfiguration.getString("settings.default-inventory-type", "HOPPER");
@@ -77,25 +77,25 @@ public class LootBagsManager {
 
             ConfigurationSection bagSection = fileConfiguration.getConfigurationSection("bags." + bagName);
 
-            LootBag.LootBag lootBag = new LootBag.LootBag(
+            LootBag lootBag = new LootBag(
                     bagSection.getString("settings.name"),
                     parseItem(bagSection.getConfigurationSection("item")),
-                    bagSection.getConfigurationSection("requirements"),
+                    new RequirementsPredicate(bagSection.getConfigurationSection("requirements")),
                     bagSection.getStringList("drops"),
                     bagSection.getStringList("loot"),
                     (lootBag1) -> {
                         return Utils.createInventory(lootBag1.getName() + " Loot Bag", bagSection.getString("settings.inventory-type-or-size"), defaultInventoryType);
                     });
-            bags.put(lootBag.name, lootBag);
+            bags.put(lootBag.getName(), lootBag);
         }
 
         // using an array deque, we'll peek into the next slot instead of relying upon an exception
         // to populate recipes
-        final ArrayDeque<LootBag.LootBag> processingBags = new ArrayDeque<>(getBags());
+        final ArrayDeque<LootBag> processingBags = new ArrayDeque<>(getBags());
         while (!processingBags.isEmpty()) {
-            final LootBag.LootBag currentBag = processingBags.pop();
+            final LootBag currentBag = processingBags.pop();
             // Declare var, mainly for making the IDE quiet
-            final LootBag.LootBag nextBag = processingBags.peek();
+            final LootBag nextBag = processingBags.peek();
             if (nextBag != null) {
                 ShapelessRecipe recipe;
 
@@ -137,7 +137,7 @@ public class LootBagsManager {
         return newList;
     }
 
-    public List<LootBag.LootBag> getBags() {
+    public List<LootBag> getBags() {
         return new ArrayList<>(bags.values());
     }
 

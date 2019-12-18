@@ -23,7 +23,7 @@ public class InventoryListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
             Player player = (Player) event.getWhoClicked();
-            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.doesInventoryBelongToBag(event.getInventory())) {
                     ItemStack itemStack = event.getCurrentItem();
                     if (itemStack != null && itemStack.getType() != Material.AIR) {

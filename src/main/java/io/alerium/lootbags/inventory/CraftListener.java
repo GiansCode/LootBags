@@ -18,7 +18,7 @@ public class CraftListener implements Listener {
     public void onPreCraft(PrepareItemCraftEvent event) {
         CraftingInventory inventory = event.getInventory();
 
-        for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+        for (LootBag bag : LootBagsManager.getInstance().getBags()) {
             if (event.getRecipe() == bag.getRecipe()) {
                 for (ItemStack itemStack : inventory.getMatrix()) {
                     if (itemStack != bag.getItem()) {

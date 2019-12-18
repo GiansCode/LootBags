@@ -15,7 +15,7 @@ public class EntityDeathListener implements Listener {
     @EventHandler
     public void onDeath(EntityDeathEvent event) {
         if (event.getEntity().getKiller() != null) {
-            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag bag : LootBagsManager.getInstance().getBags()) {
                 bag.processKill(event.getEntity(), event.getEntity().getKiller());
             }
         }

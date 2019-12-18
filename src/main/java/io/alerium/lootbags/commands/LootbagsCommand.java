@@ -26,7 +26,7 @@ public class LootbagsCommand implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("list")) {
             sender.sendMessage(ChatUtil.format("&aThese are the current loot bags:"));
-            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag bag : LootBagsManager.getInstance().getBags()) {
                 sender.sendMessage(ChatUtil.format("&a- " + bag.getName()));
             }
         } else if (args[0].equalsIgnoreCase("give")) {
@@ -59,7 +59,7 @@ public class LootbagsCommand implements CommandExecutor {
                 // ignore
             }
 
-            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.getName().equalsIgnoreCase(name)) {
 
                         player.sendMessage(
@@ -96,7 +96,7 @@ public class LootbagsCommand implements CommandExecutor {
                 // ignore
             }
 
-            for (LootBag.LootBag bag : LootBagsManager.getInstance().getBags()) {
+            for (LootBag bag : LootBagsManager.getInstance().getBags()) {
                 if (bag.getName().equalsIgnoreCase(name)) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         player.sendMessage(

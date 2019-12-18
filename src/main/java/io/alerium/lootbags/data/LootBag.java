@@ -15,31 +15,27 @@ import java.util.function.Function;
 
 import io.alerium.lootbags.ChatUtil;
 import io.alerium.lootbags.LootBagsPlugin;
+import io.alerium.lootbags.RequirementsPredicate;
 import pw.valaria.requirementsprocessor.RequirementsUtil;
 
 public class LootBag {
 
     private String name;
     private ItemStack item;
+    private RequirementsPredicate requirements;
     private Function<LootBag, Inventory> inventoryCreator;
     private List<String> dropsString;
     private List<String> lootString;
     private Recipe recipe;
-    private ConfigurationSection requirements;
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
-    public LootBag(String name, ItemStack item, ConfigurationSection requirements, List<String> dropsString, List<String> lootString, Function<LootBag, Inventory> inventoryCreator) {
+    public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<String> dropsString, List<String> lootString, Function<LootBag, Inventory> inventoryCreator) {
         this.name = name;
         this.item = item;
+        this.requirements = requirements;
         this.inventoryCreator = inventoryCreator;
         // The design choice of the requirements util requires that the requirements are extracted from the item,
         // Our solution for this to ensure sane API support by re-embedding the passed requirements into a requirements section if needed
-        if (requirements != null && requirements.get("requirements") == null) {
-            this.requirements = new YamlConfiguration();
-            this.requirements.set("requirements", requirements);
-        } else {
-            this.requirements = requirements;
-        }
         this.dropsString = dropsString;
         this.lootString = lootString;
     }
@@ -61,7 +57,7 @@ public class LootBag {
 
     public void process(Player player) {
         if (requirements != null) {
-            if (!RequirementsUtil.handle(player, requirements)) {
+            if (!requirements.test(player)) {
                 player.sendMessage(ChatUtil.format("&cYou don't have permission to open this loot bag."));
                 return;
             }
