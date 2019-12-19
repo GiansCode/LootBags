@@ -2,8 +2,8 @@ package io.alerium.lootbags.data;
 
 public class Reward {
 
-    private String reward;
-    private Integer chance;
+    private final String reward;
+    private final Integer chance;
 
     public Reward(String reward, Integer chance) {
         this.reward = reward;

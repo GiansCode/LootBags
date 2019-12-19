@@ -15,7 +15,7 @@ import io.alerium.lootbags.data.Reward;
 public class LootOpenEvent extends Event implements Cancellable {
     private final Player player;
     private final LootBag lootBag;
-    private Inventory inventory;
+    private final Inventory inventory;
     private final List<Reward> rewards;
 
     private boolean isCancelled = false;

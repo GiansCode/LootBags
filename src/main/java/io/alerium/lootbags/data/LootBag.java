@@ -22,15 +22,15 @@ import io.samdev.actionutil.ActionUtil;
 
 public class LootBag {
 
-    private String name;
-    private ItemStack item;
-    private RequirementsPredicate requirements;
-    private Function<LootBag, Inventory> inventoryCreator;
-    private List<Loot> loots;
-    private List<Reward> rewards;
+    private final String name;
+    private final ItemStack item;
+    private final RequirementsPredicate requirements;
+    private final Function<LootBag, Inventory> inventoryCreator;
+    private final List<Loot> loots;
+    private final List<Reward> rewards;
     private Recipe recipe;
 
-    private EnumMap<EntityType, Drop> dropsEnumMap = new EnumMap<>(EntityType.class);
+    private final EnumMap<EntityType, Drop> dropsEnumMap = new EnumMap<>(EntityType.class);
 //        private Map<Player, Inventory> inventoryMap = new HashMap<>();
 
     public LootBag(String name, ItemStack item, RequirementsPredicate requirements, List<Drop> drops, List<Loot> loots, List<Reward> rewards, Function<LootBag, Inventory> inventoryCreator) {
@@ -41,7 +41,9 @@ public class LootBag {
         this.rewards = rewards;
         this.inventoryCreator = inventoryCreator;
 
-        drops.forEach(drop -> dropsEnumMap.put(drop.getEntityType(), drop));
+        for (Drop drop : drops) {
+            dropsEnumMap.put(drop.getEntityType(), drop);
+        }
     }
 
     public void processKill(Entity entity, Player player) {
@@ -56,26 +58,28 @@ public class LootBag {
         }
     }
 
-    public boolean process(Player player) {
+    public void process(Player player) {
         if (requirements != null) {
             if (!requirements.test(player)) {
                 player.sendMessage(StringUtil.format("&cYou don't have permission to open this loot bag."));
-                return false;
+                return;
             }
         }
 
 //            if (inventoryMap.get(player) == null) {
         Inventory inventory = inventoryCreator.apply(this);
 
-        Loot randomLoot = loots.get(ThreadLocalRandom.current().nextInt(loots.size()));
-        inventory.addItem(randomLoot.getItemStack());
+        if (!loots.isEmpty()) {
+            Loot randomLoot = loots.get(ThreadLocalRandom.current().nextInt(loots.size()));
+            inventory.addItem(randomLoot.getItemStack());
 
-        for (Loot loot : loots) {
-            int selected = randInt(0, 100);
-            if (selected <= loot.getPercentage()) {
-                ItemStack lootItem = loot.getItemStack().clone();
-                lootItem.setAmount(loot.getAmount());
-                inventory.addItem(lootItem);
+            for (Loot loot : loots) {
+                int selected = randInt(0, 100);
+                if (selected <= loot.getPercentage()) {
+                    ItemStack lootItem = loot.getItemStack().clone();
+                    lootItem.setAmount(loot.getAmount());
+                    inventory.addItem(lootItem);
+                }
             }
         }
 
@@ -92,13 +96,18 @@ public class LootBag {
 
         LootOpenEvent event = new LootOpenEvent(player, this, inventory, rewards);
         if (event.isCancelled()) {
-            return false;
+            return;
         }
 
         player.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", getName())));
 
         for (Reward reward : event.getRewards()) {
-            ActionUtil.executeActions(player, LootBagsManager.getInstance().getReward(reward.getReward()));
+            List<String> rewardActions = LootBagsManager.getInstance().getReward(reward.getReward());
+            if (rewardActions == null) {
+                LootBagsPlugin.getInstance().getLogger().warning("Missing reward (" + reward.getReward() + ") from loot (" + getName() + ")");
+                continue;
+            }
+            ActionUtil.executeActions(player, rewardActions);
         }
 
         player.openInventory(inventory);
@@ -108,8 +117,7 @@ public class LootBag {
             player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
         }
 
-        return true;
-//                inventoryMap.put(player, inventory);
+        //                inventoryMap.put(player, inventory);
 
 //                remove(player);
 //                if (player.getItemInHand().getAmount() <= 1) {

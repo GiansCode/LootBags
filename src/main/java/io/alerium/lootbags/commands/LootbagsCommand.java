@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import io.alerium.lootbags.StringUtil;
 import io.alerium.lootbags.LootBagsManager;
@@ -17,7 +18,7 @@ import io.alerium.lootbags.data.LootBag;
 public class LootbagsCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (args.length == 0) {
             sender.sendMessage(StringUtil.format("&aRunning LootBags " + LootBagsPlugin.getInstance().getDescription().getVersion() + " by " + LootBagsPlugin.getInstance().getDescription().getAuthors().get(0)));
@@ -46,12 +47,12 @@ public class LootbagsCommand implements CommandExecutor {
             String playerName = args[1];
             int amount = 1;
 
-            if (Bukkit.getPlayer(playerName) == null) {
+            Player player = Bukkit.getPlayer(playerName);
+
+            if (player == null) {
                 sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("playerOffline")));
                 return true;
             }
-
-            Player player = Bukkit.getPlayer(playerName);
 
             try {
                 amount = Integer.parseInt(args[3]);

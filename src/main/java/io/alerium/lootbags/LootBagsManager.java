@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -22,7 +24,7 @@ import pw.valaria.requirementsprocessor.RequirementsUtil;
  */
 public class LootBagsManager {
 
-    private static LootBagsManager ourInstance = new LootBagsManager();
+    private static final LootBagsManager ourInstance = new LootBagsManager();
 
     public static LootBagsManager getInstance() {
         return ourInstance;
@@ -32,8 +34,8 @@ public class LootBagsManager {
     private boolean configWasMutated = false;
     private InventoryType defaultInventoryType;
 
-    boolean hasActionUtil;
-    Map<String, List<String>> rewardsMap = new HashMap<>();
+    final boolean hasActionUtil;
+    final Map<String, List<String>> rewardsMap = new HashMap<>();
 
     private LootBagsManager() {
         boolean isLegacy1;
@@ -52,7 +54,7 @@ public class LootBagsManager {
         hasActionUtil = actionUtil != null && actionUtil.isEnabled();
     }
 
-    private Map<String, LootBag> bags = new HashMap<>();
+    private final Map<String, LootBag> bags = new HashMap<>();
 
     void boot(LootBagsPlugin lootBagsPlugin) {
         FileConfiguration fileConfiguration = lootBagsPlugin.getConfig();
@@ -118,6 +120,14 @@ public class LootBagsManager {
         bags.put(lootBag.getName(), lootBag);
     }
 
+    @Nullable
+    public List<String> registerReward(@NotNull String rewardName, @NotNull List<String> rewards) {
+        Objects.requireNonNull(rewardName, "rewardName");
+        Objects.requireNonNull(rewards, "rewards");
+
+        return rewardsMap.put(rewardName, rewards);
+    }
+
     private void loadRewardInfo(LootBagsPlugin lootBagsPlugin) {
         if (!hasActionUtil) {
             lootBagsPlugin.getLogger().log(Level.INFO, "ActionUtil not found");
@@ -145,19 +155,21 @@ public class LootBagsManager {
             lootBagsPlugin.getLogger().log(Level.WARNING, "rewards.yml is empty?!");
             return;
         }
-        rewardsSection.getKeys(false).forEach(rewardName -> {
+        for (String rewardName : rewardsSection.getKeys(false)) {
             Object rewardEntry = rewardsSection.get(rewardName);
             if (rewardEntry instanceof String) {
                 rewardsMap.computeIfAbsent(rewardName, (k) -> new ArrayList<>()).add((String) rewardEntry);
             } else if (rewardEntry instanceof List) {
-                ((List<?>) rewardEntry).stream()
-                        .filter(entry -> entry instanceof String)
-                        .forEach(entry -> rewardsMap.computeIfAbsent(rewardName, (k) -> new ArrayList<>()).add((String) entry));
+                for (Object entry : ((List<?>) rewardEntry)) {
+                    if (entry instanceof String) {
+                        rewardsMap.computeIfAbsent(rewardName, (k) -> new ArrayList<>()).add((String) entry);
+                    }
+                }
             } else {
                 lootBagsPlugin.getLogger().log(Level.WARNING, "Don't know how to deal with reward entry for " + rewardName + "  {" + rewardEntry + "}");
             }
 
-        });
+        }
 
     }
 
@@ -202,34 +214,36 @@ public class LootBagsManager {
             List<Map<String, Object>> newLoot = new ArrayList<>();
             boolean wasMutated = false;
 
-            for (Object lootEntry : loot) {
-                if (lootEntry instanceof Map) {
-                    //noinspection unchecked
-                    newLoot.add((Map<String, Object>) lootEntry);
-                } else if (lootEntry instanceof String) {
-                    String lootEntryString = (String) lootEntry;
-                    int percentage = Integer.parseInt(lootEntryString.split(";")[3]);
-                    int amount = Integer.parseInt(lootEntryString.split(";")[2]);
-                    short data = (short) Integer.parseInt(lootEntryString.split(";")[1]);
-                    String type = lootEntryString.split(";")[0].toUpperCase();
+            if (loot != null) {
+                for (Object lootEntry : loot) {
+                    if (lootEntry instanceof Map) {
+                        //noinspection unchecked
+                        newLoot.add((Map<String, Object>) lootEntry);
+                    } else if (lootEntry instanceof String) {
+                        String lootEntryString = (String) lootEntry;
+                        int percentage = Integer.parseInt(lootEntryString.split(";")[3]);
+                        int amount = Integer.parseInt(lootEntryString.split(";")[2]);
+                        short data = (short) Integer.parseInt(lootEntryString.split(";")[1]);
+                        String type = lootEntryString.split(";")[0].toUpperCase();
 
-                    Map<String, Object> newLootEntry = new HashMap<String, Object>();
-                    newLootEntry.put("type", type);
-                    newLootEntry.put("data", data);
-                    newLootEntry.put("amount", amount);
-                    newLootEntry.put("percentage", percentage);
+                        Map<String, Object> newLootEntry = new HashMap<>();
+                        newLootEntry.put("type", type);
+                        newLootEntry.put("data", data);
+                        newLootEntry.put("amount", amount);
+                        newLootEntry.put("percentage", percentage);
 
-                    newLoot.add(newLootEntry);
-                    wasMutated = true;
-                } else {
-                    LootBagsPlugin.getInstance().getLogger().warning("Unable to handle loots for lootbag" + bagName);
+                        newLoot.add(newLootEntry);
+                        wasMutated = true;
+                    } else {
+                        LootBagsPlugin.getInstance().getLogger().warning("Unable to handle loots for lootbag" + bagName);
+                    }
+
                 }
 
-            }
-
-            if (wasMutated) {
-                bag.set("loot", newLoot);
-                configWasMutated = true;
+                if (wasMutated) {
+                    bag.set("loot", newLoot);
+                    configWasMutated = true;
+                }
             }
         }
 
@@ -240,26 +254,28 @@ public class LootBagsManager {
             List<Map<String, Object>> newDrops = new ArrayList<>();
             boolean wasMutated = false;
 
-            for (Object dropEntry : drops) {
-                if (dropEntry instanceof Map) {
-                    //noinspection unchecked
-                    newDrops.add((Map<String, Object>) dropEntry);
-                } else if (dropEntry instanceof String) {
-                    String lootEntryString = (String) dropEntry;
+            if (drops != null) {
+                for (Object dropEntry : drops) {
+                    if (dropEntry instanceof Map) {
+                        //noinspection unchecked
+                        newDrops.add((Map<String, Object>) dropEntry);
+                    } else if (dropEntry instanceof String) {
+                        String lootEntryString = (String) dropEntry;
 
-                    String entityType = lootEntryString.split(";")[0];
-                    int percentage = Integer.parseInt(lootEntryString.split(";")[1]);
+                        String entityType = lootEntryString.split(";")[0];
+                        int percentage = Integer.parseInt(lootEntryString.split(";")[1]);
 
-                    Map<String, Object> newDropEntry = new HashMap<String, Object>();
-                    newDropEntry.put("entity-type", entityType);
-                    newDropEntry.put("percentage", percentage);
+                        Map<String, Object> newDropEntry = new HashMap<>();
+                        newDropEntry.put("entity-type", entityType);
+                        newDropEntry.put("percentage", percentage);
 
-                    newDrops.add(newDropEntry);
-                    wasMutated = true;
-                } else {
-                    LootBagsPlugin.getInstance().getLogger().warning("Unable to handle drops for lootbag " + bagName);
+                        newDrops.add(newDropEntry);
+                        wasMutated = true;
+                    } else {
+                        LootBagsPlugin.getInstance().getLogger().warning("Unable to handle drops for lootbag " + bagName);
+                    }
+
                 }
-
             }
 
             if (wasMutated) {

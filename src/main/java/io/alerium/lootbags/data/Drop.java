@@ -4,8 +4,8 @@ import org.bukkit.entity.EntityType;
 
 public class Drop {
 
-    private EntityType entityType;
-    private Integer chance;
+    private final EntityType entityType;
+    private final Integer chance;
 
     public Drop(EntityType entityType, Integer chance) {
         this.entityType = entityType;
