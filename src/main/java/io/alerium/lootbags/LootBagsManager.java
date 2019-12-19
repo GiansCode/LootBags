@@ -128,6 +128,7 @@ public class LootBagsManager {
         return rewardsMap.put(rewardName, rewards);
     }
 
+
     private void loadRewardInfo(LootBagsPlugin lootBagsPlugin) {
         if (!hasActionUtil) {
             lootBagsPlugin.getLogger().log(Level.INFO, "ActionUtil not found");
@@ -171,6 +172,15 @@ public class LootBagsManager {
 
         }
 
+    }
+
+    public Set<String> getRewards() {
+        return rewardsMap.keySet();
+    }
+
+    public List<String> getReward(String reward) {
+        List<String> rewards = rewardsMap.get(reward);
+        return rewards == null ? null : new ArrayList<>(rewards);
     }
 
     public List<LootBag> getBags() {
@@ -289,9 +299,5 @@ public class LootBagsManager {
 
     public boolean hasActionUtil() {
         return hasActionUtil;
-    }
-
-    public List<String> getReward(String reward) {
-        return rewardsMap.get(reward);
     }
 }
