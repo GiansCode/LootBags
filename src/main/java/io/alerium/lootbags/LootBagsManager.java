@@ -76,13 +76,13 @@ public class LootBagsManager {
             try {
                 registerBag(new LootBag(
                         bagSection.getString("settings.name"),
-                        Utils.parseItem(Objects.requireNonNull(bagSection.getConfigurationSection("item"), "Item")),
+                        LootUtils.parseItem(Objects.requireNonNull(bagSection.getConfigurationSection("item"), "Item")),
                         new RequirementsPredicate(bagSection.getConfigurationSection("requirements")),
-                        Utils.parseDrops(bagSection),
-                        Utils.parseLoots(bagSection),
-                        Utils.parseRewards(rewardsMap, bagSection),
+                        LootUtils.parseDrops(bagSection),
+                        LootUtils.parseLoots(bagSection),
+                        LootUtils.parseRewards(rewardsMap, bagSection),
                         (lootBag1) -> {
-                            return Utils.createInventory(lootBag1.getName() + " Loot Bag", bagSection.getString("settings.inventory-type-or-size"), defaultInventoryType);
+                            return LootUtils.createInventory(lootBag1.getName() + " Loot Bag", bagSection.getString("settings.inventory-type-or-size"), defaultInventoryType);
                         }));
             } catch (Throwable ex) {
                 LootBagsPlugin.getInstance().getLogger().log(Level.WARNING, "An error occured while processing loot bag " + bagName, ex);

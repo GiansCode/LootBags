@@ -19,7 +19,7 @@ import io.alerium.lootbags.data.Drop;
 import io.alerium.lootbags.data.Loot;
 import io.alerium.lootbags.data.Reward;
 
-public class Utils {
+public class LootUtils {
 
     public static Inventory createInventory(String name, String typeString, InventoryType defaultType) {
 
