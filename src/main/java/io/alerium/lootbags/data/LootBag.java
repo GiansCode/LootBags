@@ -72,14 +72,12 @@ public class LootBag {
 
         for (Loot loot : loots) {
             int selected = randInt(0, 100);
-            if (selected <=loot.getPercentage()) {
+            if (selected <= loot.getPercentage()) {
                 ItemStack lootItem = loot.getItemStack().clone();
                 lootItem.setAmount(loot.getAmount());
                 inventory.addItem(lootItem);
             }
         }
-
-
 
 
         List<Reward> rewards = new ArrayList<>();

@@ -23,7 +23,6 @@ public class RequirementsPredicate implements Predicate<CommandSender> {
         }
     }
 
-
     @Override
     public boolean test(CommandSender commandSender) {
         if (commandSender instanceof Player && requirements != null) {

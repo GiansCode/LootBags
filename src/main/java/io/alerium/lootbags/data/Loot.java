@@ -8,6 +8,7 @@ public class Loot {
     private final ItemStack itemStack;
     private Integer amount;
     private final Integer percentage;
+
     public Loot(ItemStack itemStack, Integer amount, Integer percentage) {
         this.itemStack = itemStack;
         this.amount = amount;
