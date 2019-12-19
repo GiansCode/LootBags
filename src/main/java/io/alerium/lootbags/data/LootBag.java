@@ -7,15 +7,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.StringUtil;
 import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
 import io.alerium.lootbags.RequirementsPredicate;
+import io.alerium.lootbags.event.LootOpenEvent;
 import io.samdev.actionutil.ActionUtil;
 
 public class LootBag {
@@ -49,16 +51,16 @@ public class LootBag {
 
             if (selected <= drop.getChance()) {
                 entity.getLocation().getWorld().dropItem(entity.getLocation(), item);
-                player.sendMessage(ChatUtil.format("&aYou got a " + name + " loot bag!"));
+                player.sendMessage(StringUtil.format("&aYou got a " + name + " loot bag!"));
             }
         }
     }
 
-    public void process(Player player) {
+    public boolean process(Player player) {
         if (requirements != null) {
             if (!requirements.test(player)) {
-                player.sendMessage(ChatUtil.format("&cYou don't have permission to open this loot bag."));
-                return;
+                player.sendMessage(StringUtil.format("&cYou don't have permission to open this loot bag."));
+                return false;
             }
         }
 
@@ -77,17 +79,28 @@ public class LootBag {
             }
         }
 
-        player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", getName())));
 
+
+
+        List<Reward> rewards = new ArrayList<>();
         if (LootBagsManager.getInstance().hasActionUtil()) {
-
-
-            for (Reward reward : rewards) {
+            for (Reward reward : this.rewards) {
                 int selected = randInt(0, 100);
                 if (selected <= reward.getChance()) {
-                    ActionUtil.executeActions(player, LootBagsManager.getInstance().getReward(reward.getReward()));
+                    rewards.add(reward);
                 }
             }
+        }
+
+        LootOpenEvent event = new LootOpenEvent(player, this, inventory, rewards);
+        if (event.isCancelled()) {
+            return false;
+        }
+
+        player.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("useBag").replace("%type%", getName())));
+
+        for (Reward reward : event.getRewards()) {
+            ActionUtil.executeActions(player, LootBagsManager.getInstance().getReward(reward.getReward()));
         }
 
         player.openInventory(inventory);
@@ -96,6 +109,8 @@ public class LootBag {
         } else {
             player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
         }
+
+        return true;
 //                inventoryMap.put(player, inventory);
 
 //                remove(player);

@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.StringUtil;
 import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
 import io.alerium.lootbags.data.LootBag;
@@ -34,7 +34,7 @@ public class InventoryListener implements Listener {
 
                         if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
                             event.setCancelled(true);
-                            player.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("noShift")));
+                            player.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("noShift")));
                             return;
                         }
 
@@ -54,20 +54,6 @@ public class InventoryListener implements Listener {
                 }
             }
         }
-    }
-
-    private String capitalizeString(String string) {
-        char[] chars = string.toLowerCase().toCharArray();
-        boolean found = false;
-        for (int i = 0; i < chars.length; i++) {
-            if (!found && Character.isLetter(chars[i])) {
-                chars[i] = Character.toUpperCase(chars[i]);
-                found = true;
-            } else if (Character.isWhitespace(chars[i]) || chars[i]=='.' || chars[i]=='\'') { // You can add other chars here
-                found = false;
-            }
-        }
-        return String.valueOf(chars);
     }
 
 }

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import io.alerium.lootbags.ChatUtil;
+import io.alerium.lootbags.StringUtil;
 import io.alerium.lootbags.LootBagsManager;
 import io.alerium.lootbags.LootBagsPlugin;
 import io.alerium.lootbags.data.LootBag;
@@ -20,23 +20,23 @@ public class LootbagsCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (args.length == 0) {
-            sender.sendMessage(ChatUtil.format("&aRunning LootBags " + LootBagsPlugin.getInstance().getDescription().getVersion() + " by " + LootBagsPlugin.getInstance().getDescription().getAuthors().get(0)));
+            sender.sendMessage(StringUtil.format("&aRunning LootBags " + LootBagsPlugin.getInstance().getDescription().getVersion() + " by " + LootBagsPlugin.getInstance().getDescription().getAuthors().get(0)));
             return true;
         }
 
         if (args[0].equalsIgnoreCase("list")) {
-            sender.sendMessage(ChatUtil.format("&aThese are the current loot bags:"));
+            sender.sendMessage(StringUtil.format("&aThese are the current loot bags:"));
             for (LootBag bag : LootBagsManager.getInstance().getBags()) {
-                sender.sendMessage(ChatUtil.format("&a- " + bag.getName()));
+                sender.sendMessage(StringUtil.format("&a- " + bag.getName()));
             }
         } else if (args[0].equalsIgnoreCase("give")) {
             if (!sender.hasPermission("lootbags.give")) {
-                sender.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("noPermission")));
+                sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("noPermission")));
                 return true;
             }
 
             if (args.length < 3) {
-                sender.sendMessage(ChatUtil.format("&c/lootbags give <name> <type> [amount]"));
+                sender.sendMessage(StringUtil.format("&c/lootbags give <name> <type> [amount]"));
                 return true;
             }
 
@@ -47,7 +47,7 @@ public class LootbagsCommand implements CommandExecutor {
             int amount = 1;
 
             if (Bukkit.getPlayer(playerName) == null) {
-                sender.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("playerOffline")));
+                sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("playerOffline")));
                 return true;
             }
 
@@ -63,7 +63,7 @@ public class LootbagsCommand implements CommandExecutor {
                 if (bag.getName().equalsIgnoreCase(name)) {
 
                         player.sendMessage(
-                                ChatUtil.format(LootBagsPlugin.getInstance().getMessage("give")
+                                StringUtil.format(LootBagsPlugin.getInstance().getMessage("give")
                                         .replace("%sender%", sender.getName())
                                         .replace("%type%", name)
                                         .replace("%amount%", amount + "")));
@@ -75,15 +75,15 @@ public class LootbagsCommand implements CommandExecutor {
                 }
             }
 
-            sender.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("bagNotExist")));
+            sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("bagNotExist")));
         } else if (args[0].equalsIgnoreCase("giveall")) {
             if (!sender.hasPermission("lootbags.give.all")) {
-                sender.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("playerOffline")));
+                sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("playerOffline")));
                 return true;
             }
 
             if (args.length < 2) {
-                sender.sendMessage(ChatUtil.format("&c/lootbags giveall <type> [amount]"));
+                sender.sendMessage(StringUtil.format("&c/lootbags giveall <type> [amount]"));
                 return true;
             }
 
@@ -100,7 +100,7 @@ public class LootbagsCommand implements CommandExecutor {
                 if (bag.getName().equalsIgnoreCase(name)) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         player.sendMessage(
-                                ChatUtil.format(LootBagsPlugin.getInstance().getMessage("giveAll")
+                                StringUtil.format(LootBagsPlugin.getInstance().getMessage("giveAll")
                                         .replace("%sender%", sender.getName())
                                         .replace("%type%", name)
                                         .replace("%amount%", amount + "")));
@@ -112,7 +112,7 @@ public class LootbagsCommand implements CommandExecutor {
                 }
             }
 
-            sender.sendMessage(ChatUtil.format(LootBagsPlugin.getInstance().getMessage("bagNotExist")));
+            sender.sendMessage(StringUtil.format(LootBagsPlugin.getInstance().getMessage("bagNotExist")));
         }
 
         return false;

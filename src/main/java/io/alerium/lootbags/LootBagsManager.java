@@ -1,26 +1,20 @@
 package io.alerium.lootbags;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 
-import io.alerium.lootbags.data.Drop;
-import io.alerium.lootbags.data.Loot;
 import io.alerium.lootbags.data.LootBag;
-import io.alerium.lootbags.data.Reward;
 import pw.valaria.requirementsprocessor.RequirementsUtil;
 
 /**
@@ -80,17 +74,16 @@ public class LootBagsManager {
             assert bagSection != null;
 
             try {
-                LootBag lootBag = new LootBag(
+                registerBag(new LootBag(
                         bagSection.getString("settings.name"),
-                        parseItem(Objects.requireNonNull(bagSection.getConfigurationSection("item"), "Item")),
+                        Utils.parseItem(Objects.requireNonNull(bagSection.getConfigurationSection("item"), "Item")),
                         new RequirementsPredicate(bagSection.getConfigurationSection("requirements")),
-                        parseDrops(bagSection),
-                        parseLoots(bagSection),
-                        parseRewards(bagSection),
+                        Utils.parseDrops(bagSection),
+                        Utils.parseLoots(bagSection),
+                        Utils.parseRewards(rewardsMap, bagSection),
                         (lootBag1) -> {
                             return Utils.createInventory(lootBag1.getName() + " Loot Bag", bagSection.getString("settings.inventory-type-or-size"), defaultInventoryType);
-                        });
-                bags.put(lootBag.getName(), lootBag);
+                        }));
             } catch (Throwable ex) {
                 LootBagsPlugin.getInstance().getLogger().log(Level.WARNING, "An error occured while processing loot bag " + bagName, ex);
             }
@@ -119,6 +112,10 @@ public class LootBagsManager {
             }
         }
 
+    }
+
+    public void registerBag(LootBag lootBag) {
+        bags.put(lootBag.getName(), lootBag);
     }
 
     private void loadRewardInfo(LootBagsPlugin lootBagsPlugin) {
@@ -162,30 +159,6 @@ public class LootBagsManager {
 
         });
 
-    }
-
-    public ItemStack parseItem(ConfigurationSection itemSection) {
-        Material material = Material.valueOf(itemSection.getString("type").toUpperCase());
-        int data = itemSection.getInt("data");
-
-        ItemStack itemStack = new ItemStack(material, 1, (short) data);
-        ItemMeta meta = itemStack.getItemMeta();
-
-        assert meta != null; // All non-air itemstacks have meta!
-
-        meta.setDisplayName(ChatUtil.format(itemSection.getString("name")));
-        meta.setLore(color(itemSection.getStringList("lore")));
-        itemStack.setItemMeta(meta);
-        return itemStack;
-
-    }
-
-    public List<String> color(List<String> list) {
-        List<String> newList = new ArrayList<>();
-        for (String str : list) {
-            newList.add(ChatUtil.format(str));
-        }
-        return newList;
     }
 
     public List<LootBag> getBags() {
@@ -296,84 +269,6 @@ public class LootBagsManager {
         }
 
 
-    }
-
-    private List<Loot> parseLoots(ConfigurationSection bag) {
-        List<Loot> loots = new ArrayList<>();
-
-        List<Map<?, ?>> lootSection = bag.getMapList("loot");
-
-        for (Map<?, ?> map : lootSection) {
-            String type = (String) Objects.requireNonNull(map.get("type"), "loot type");
-
-            short data;
-
-            Object dataRaw = map.get("data");
-            if (dataRaw == null) {
-                data = 0;
-            } else {
-                data = Short.parseShort(dataRaw.toString());
-            }
-
-            Integer percentage = Integer.parseInt(Objects.requireNonNull(map.get("percentage"), "percentage").toString());
-
-            int amount;
-            Object amountRaw = map.get("amount");
-            if (amountRaw == null) {
-                amount = 0;
-            } else {
-                amount = Integer.parseInt(amountRaw.toString());
-            }
-
-            loots.add(new Loot(new ItemStack(Material.valueOf(type), 1, data), amount, percentage));
-        }
-
-        return loots;
-    }
-
-    private List<Drop> parseDrops(ConfigurationSection bag) {
-        List<Drop> drops = new ArrayList<>();
-
-        List<Map<?, ?>> dropSection = bag.getMapList("drops");
-
-        for (Map<?, ?> map : dropSection) {
-            String type = (String) Objects.requireNonNull(map.get("entity-type"), "entity type");
-            EntityType entityType;
-            try {
-                entityType = EntityType.valueOf(type);
-            } catch (IllegalArgumentException ex) {
-                LootBagsPlugin.getInstance().getLogger().log(Level.WARNING, "Invalid entity type: " + type, ex);
-                continue;
-            }
-
-            Integer percentage = Integer.parseInt(Objects.requireNonNull(map.get("percentage"), "percentage").toString());
-
-
-            drops.add(new Drop(entityType, percentage));
-        }
-
-        return drops;
-    }
-
-    private List<Reward> parseRewards(ConfigurationSection bag) {
-        List<Reward> rewards = new ArrayList<>();
-
-        List<Map<?, ?>> rewardSection = bag.getMapList("rewards");
-
-        for (Map<?, ?> map : rewardSection) {
-
-            String reward = (String) Objects.requireNonNull(map.get("reward"), "reward type");
-            Integer percentage = Integer.parseInt(Objects.requireNonNull(map.get("percentage"), "percentage").toString());
-
-            if (rewardsMap.get(reward) == null) {
-                LootBagsPlugin.getInstance().getLogger().log(Level.WARNING, "missing reward type " + reward);
-                continue;
-            }
-
-            rewards.add(new Reward(reward, percentage));
-        }
-
-        return rewards;
     }
 
     public boolean hasActionUtil() {
